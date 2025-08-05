@@ -9,13 +9,18 @@
 #### Getting started
 
 To start the adventure with this library we have to install all required dependencies:
-
+### MYSQL
 ```bash
 $ npm install --save typeorm mysql2
+```
+### POSTGRES
+```bash
+$ npm install --save typeorm pg
 ```
 
 The first step we need to do is to establish the connection with our database using `new DataSource().initialize()` class imported from the `typeorm` package. The `initialize()` function returns a `Promise`, and therefore we have to create an [async provider](/fundamentals/async-components).
 
+### MYSQL
 ```typescript
 @@filename(database.providers)
 import { DataSource } from 'typeorm';
@@ -43,6 +48,33 @@ export const databaseProviders = [
 ];
 ```
 
+### POSTGRES
+```typescript
+@@filename(database.providers)
+import { DataSource } from 'typeorm';
+
+export const databaseProviders = [
+  {
+    provide: 'DATA_SOURCE',
+    useFactory: async () => {
+      const dataSource = new DataSource({
+        type: 'postgres',
+        host: 'localhost',
+        port: 5432,
+        username: 'root',
+        password: 'root',
+        database: 'test',
+        entities: [
+            __dirname + '/../**/*.entity{.ts,.js}',
+        ],
+        synchronize: true,
+      });
+
+      return dataSource.initialize();
+    },
+  },
+];
+```
 > warning **Warning** Setting `synchronize: true` shouldn't be used in production - otherwise you can lose production data.
 
 > info **Hint** Following best practices, we declared the custom provider in the separated file which has a `*.providers.ts` suffix.
